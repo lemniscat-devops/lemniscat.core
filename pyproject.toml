@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lemniscat.core"
-version = "0.0.3"
+version = ".*"
 authors = [
   { name="Philippe MORISSEAU", email="philippe.morisseau@outlook.com" },
 ]
