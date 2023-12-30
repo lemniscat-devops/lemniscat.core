@@ -25,14 +25,14 @@ jobs:
       if: github.ref == 'refs/heads/main'
       run: |
         $data = Get-Content -Path .\pyproject.toml -Raw
-        $data = $data -replace 'version = ".*"', "version = ""$($env:GitVersion_MajorMinorPatch)"""
+        $data = $data -replace 'version = "0.0.1"', "version = ""$($env:GitVersion_MajorMinorPatch)"""
         $data | Set-Content -Path .\pyproject.toml
     - name: Set version in pyproject.toml for feat/fix branch
       shell: pwsh
       if: startsWith(github.ref, 'refs/heads/feat/') || startsWith(github.ref, 'refs/heads/fix/')
       run: |
         $data = Get-Content -Path .\pyproject.toml -Raw
-        $data = $data -replace 'version = ".*"', "version = ""$($env:GitVersion_AssemblySemFileVer)"""
+        $data = $data -replace 'version = "0.0.1"', "version = ""$($env:GitVersion_MajorMinorPatch)"""
         $data | Set-Content -Path .\pyproject.toml
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -144,3 +144,4 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        skip-existing: true
