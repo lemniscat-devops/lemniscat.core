@@ -20,11 +20,19 @@ jobs:
       with:
         useConfigFile: true
         configFilePath: ./gitversion.yml
-    - name: Set version in pyproject.toml
+    - name: Set version in pyproject.toml for main branch
       shell: pwsh
+      if: github.ref == 'refs/heads/main'
       run: |
         $data = Get-Content -Path .\pyproject.toml -Raw
-        $data = $data -replace 'version = ".*"', "version = ""$($env:GitVersion_SemVer)"""
+        $data = $data -replace 'version = ".*"', "version = ""$($env:GitVersion_MajorMinorPatch)"""
+        $data | Set-Content -Path .\pyproject.toml
+    - name: Set version in pyproject.toml for feat/fix branch
+      shell: pwsh
+      if: startsWith(github.ref, 'refs/heads/feat/') || startsWith(github.ref, 'refs/heads/fix/')
+      run: |
+        $data = Get-Content -Path .\pyproject.toml -Raw
+        $data = $data -replace 'version = ".*"', "version = ""$($env:GitVersion_AssemblySemFileVer)"""
         $data | Set-Content -Path .\pyproject.toml
     - name: Set up Python
       uses: actions/setup-python@v4
