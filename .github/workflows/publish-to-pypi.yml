@@ -19,6 +19,7 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0
       with:
         useConfigFile: true
+        configFilePath: ./gitversion.yml
     - name: Set version in pyproject.toml
       shell: pwsh
       run: |
