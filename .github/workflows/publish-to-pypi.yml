@@ -52,15 +52,11 @@ jobs:
         name: python-package-distributions
         path: dist/
     - name: Add git release tag
-      uses: actions/github-script@v6
-      with:
-        script: |        
-          github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `refs/tags/${{ env.GitVersion_SemVer }}`,
-              sha: context.sha
-          })
+      #if: github.ref == 'refs/heads/main' # only tag on main branch
+      run: | 
+        git config --global user.email "runner@github.com"
+        git config --global user.name "Github Runner"
+        git tag -a ${{ env.GitVersion_SemVer }} -m "Release ${{ env.GitVersion_SemVer }}"
 
   publish-to-pypi:
     name: >-
