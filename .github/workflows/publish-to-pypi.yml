@@ -57,6 +57,7 @@ jobs:
         git config --global user.email "runner@github.com"
         git config --global user.name "Github Runner"
         git tag -a ${{ env.GitVersion_SemVer }} -m "Release ${{ env.GitVersion_SemVer }}"
+        git push --tags
 
   publish-to-pypi:
     name: >-
