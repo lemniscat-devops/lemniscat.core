@@ -19,12 +19,15 @@ class PluginCore(object, metaclass=IPluginRegistry):
     """
 
     meta: Optional[Meta]
+    
+    variables: dict
 
     def __init__(self, logger: Logger) -> None:
         """
         Entry init block for plugins
         :param logger: logger that plugins can make use of
         """
+        self.variables = {}
         self._logger = logger
         
     def info(self) -> None:
@@ -45,3 +48,11 @@ class PluginCore(object, metaclass=IPluginRegistry):
         :return: a device for the plugin
         """
         pass
+    
+    def appendVariables(self, variables: dict) -> None:
+        self._logger.debug(f"Append {len(variables)} variables")
+        self.variables.update(variables)
+        self._logger.debug(f"Now, there are {len(self.variables)} variables provided by this task")
+        
+    def getVariables(self) -> dict:
+        return self.variables
