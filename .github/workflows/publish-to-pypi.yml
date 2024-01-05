@@ -72,6 +72,7 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
+
     steps:
     - name: Download all the dists
       uses: actions/download-artifact@v3
@@ -80,6 +81,9 @@ jobs:
         path: dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip-existing: true
 
   github-release:
     name: >-
