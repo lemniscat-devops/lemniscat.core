@@ -22,11 +22,11 @@ class Interpreter:
         isSensitive = False
         for key in value:
             if(isinstance(value[key], str)):
-                tmp = Interpreter.__intepretString(value[key], type)
+                tmp = self.__intepretString(value[key], type)
             elif(isinstance(value[key], dict)):
-                tmp = Interpreter.__interpretDict(value[key], type)
+                tmp = self.__interpretDict(value[key], type)
             elif(isinstance(value[key], list)):
-                tmp = Interpreter.__interpretList(value[key], type)
+                tmp = self.__interpretList(value[key], type)
             else:
                 tmp = value[key]
             if(tmp.sensitive):
@@ -38,17 +38,17 @@ class Interpreter:
         isSensitive = False
         for val in value:
             if(isinstance(val, str)):
-                tmp = Interpreter.__intepretString(val, type)
+                tmp = self.__intepretString(val, type)
             elif(isinstance(val, dict)):
-                tmp = Interpreter.__interpretDict(val, type)
+                tmp = self.__interpretDict(val, type)
             elif(isinstance(val, list)):
-                tmp = Interpreter.__interpretList(val, type)
+                tmp = self.__interpretList(val, type)
             else:
                 tmp = val
             if(tmp.sensitive):
                 isSensitive = True
             val = tmp.value
-        return VariableValue(val, isSensitive)    
+        return VariableValue(value, isSensitive)    
 
     def __intepretString(self, value: str, type: str = "variable") -> VariableValue:
         isSensitive = False
