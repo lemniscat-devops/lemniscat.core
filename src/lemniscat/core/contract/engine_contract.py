@@ -70,6 +70,8 @@ if __name__ == "__main__":
     plugin = PluginCore(logger)
     variables = {}
     variables["toto"] = VariableValue("${{ titi }}-2")
-    variables["titi"] = VariableValue("tata")
+    variables["titi"] = VariableValue("tata", True)
     
     plugin.invoke({ "test": "${{ toto }}"}, variables)
+    
+    
