@@ -23,6 +23,7 @@ class PluginCore(object, metaclass=IPluginRegistry):
     _interpreter: Interpreter
     
     variables: dict
+    parameters: dict
 
     def __init__(self, logger: Logger) -> None:
         """
@@ -53,7 +54,7 @@ class PluginCore(object, metaclass=IPluginRegistry):
         # interpret existing variables 
         self._interpreter.interpret()
         # interpret parameters
-        self._interpreter.__interpretDict(parameters)
+        parameters = self._interpreter.interpretParameters(parameters)
         
     
     def appendVariables(self, variables: dict) -> None:

@@ -107,15 +107,15 @@ class Interpreter:
         self._logger = logger
         self._variables = variables
     
-    def __interpretDict(self, value: dict) -> VariableValue:
+    def __interpretDict(self, value: dict, type: str = "variable") -> VariableValue:
         isSensitive = False
         for key in value:
             if(isinstance(value[key], str)):
-                tmp = Interpreter.__intepretString(value[key], self._variables)
+                tmp = Interpreter.__intepretString(value[key], type)
             elif(isinstance(value[key], dict)):
-                tmp = Interpreter.__interpretDict(value[key], self._variables)
+                tmp = Interpreter.__interpretDict(value[key])
             elif(isinstance(value[key], list)):
-                tmp = Interpreter.__interpretList(value[key], self._variables)
+                tmp = Interpreter.__interpretList(value[key])
             else:
                 tmp = value[key]
             if(tmp.sensitive):
@@ -139,7 +139,7 @@ class Interpreter:
             val = tmp.value
         return VariableValue(val, isSensitive)    
 
-    def __intepretString(self, value: str) -> VariableValue:
+    def __intepretString(self, value: str, type: str = "variable") -> VariableValue:
         isSensitive = False
         matches = re.findall(_REGEX_CAPTURE_VARIABLE, value)
         if(len(matches) > 0):
@@ -152,7 +152,7 @@ class Interpreter:
                         value = self._variables[var].value
                     else:
                         value = value.replace(f'${{{{{match}}}}}', self._variables[var].value)
-                    self._logger.debug(f"Interpreting variable: {var} -> {self._variables[var]}")
+                    self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
         return VariableValue(value, isSensitive)        
     
                         
@@ -176,4 +176,8 @@ class Interpreter:
     def interpret(self) -> None:
         for key in self._variables:
             self._variables[key] = self.__interpret(self._variables[key])
+      
+    def interpretParameters(self, parameters: dict) -> dict:
+        self.parameters = self.__interpretDict(parameters, "parameter").value
+
     
