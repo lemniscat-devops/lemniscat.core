@@ -56,6 +56,8 @@ class PluginCore(object, metaclass=IPluginRegistry):
         # interpret parameters
         parameters = self._interpreter.interpretParameters(parameters)
         
+        self._logger.debug(f"Plugin {self.meta.name} is invoked with parameters: {parameters}")
+        
     
     def appendVariables(self, variables: dict) -> None:
         self._logger.debug(f"Append {len(variables)} variables")
@@ -71,6 +73,8 @@ if __name__ == "__main__":
     variables = {}
     variables["toto"] = VariableValue("${{ titi }}-2")
     variables["titi"] = VariableValue("tata", True)
+    variables["containers_list"] = VariableValue([{ 'name': '${{ toto }}' }, { 'name':'container2'}], True)
+    variables["dict"] = VariableValue({ 'name': 'container1', 'displayname':'${{ toto }}'}, True)
     
     plugin.invoke({ "test": "${{ toto }}"}, variables)
     
