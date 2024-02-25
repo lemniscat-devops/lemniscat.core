@@ -50,13 +50,13 @@ class PluginCore(object, metaclass=IPluginRegistry):
         :param args: possible arguments for the plugin
         :return: a result for the plugin
         """
-        self._interpreter = Interpreter(self._logger, variables)
+        self.variables = variables
+        self._interpreter = Interpreter(self._logger, self.variables)
         # interpret existing variables 
         self._interpreter.interpret()
         # interpret parameters
-        parameters = self._interpreter.interpretParameters(parameters)
-        
-        self._logger.debug(f"Plugin {self.meta.name} is invoked with parameters: {parameters}")
+        self.parameters = self._interpreter.interpretParameters(parameters) 
+        self._logger.debug(f"Plugin {self.meta.name} is invoked")
         
     
     def appendVariables(self, variables: dict) -> None:
@@ -70,6 +70,7 @@ class PluginCore(object, metaclass=IPluginRegistry):
 if __name__ == "__main__":
     logger = LogUtil.create()
     plugin = PluginCore(logger)
+    plugin.meta = Meta("test", "test", "0.0.1")
     variables = {}
     variables["toto"] = VariableValue("${{ titi }}-2")
     variables["titi"] = VariableValue("tata", True)
