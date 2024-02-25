@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Optional, List
 
 from lemniscat.core.model import Meta, TaskResult
+from lemniscat.core.util.helpers import Interpreter
 
 
 class IPluginRegistry(type):
@@ -19,6 +20,7 @@ class PluginCore(object, metaclass=IPluginRegistry):
     """
 
     meta: Optional[Meta]
+    _interpreter: Interpreter
     
     variables: dict
 
@@ -41,13 +43,18 @@ class PluginCore(object, metaclass=IPluginRegistry):
         self._logger.info(f'Version: {self.meta.version}')
         self._logger.info('-----------------------------------------')
 
-    def invoke(self, **args) -> TaskResult:
+    def invoke(self, parameters: dict = {}, variables: dict = {}) -> TaskResult:
         """
         Starts main plugin flow
         :param args: possible arguments for the plugin
-        :return: a device for the plugin
+        :return: a result for the plugin
         """
-        pass
+        self._interpreter = Interpreter(self._logger, variables)
+        # interpret existing variables 
+        self._interpreter.interpret()
+        # interpret parameters
+        self._interpreter.__interpretDict(parameters)
+        
     
     def appendVariables(self, variables: dict) -> None:
         self._logger.debug(f"Append {len(variables)} variables")
