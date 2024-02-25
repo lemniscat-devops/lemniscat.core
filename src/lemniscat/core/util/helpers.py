@@ -176,7 +176,8 @@ class Interpreter:
     def interpret(self) -> None:
         for key in self._variables:
             self._variables[key] = self.__interpret(self._variables[key])
-            
+      
     def interpretParameters(self, parameters: dict) -> dict:
         self.parameters = self.__interpretDict(parameters, "parameter").value
+
     
