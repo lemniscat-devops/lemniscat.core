@@ -22,11 +22,11 @@ class Interpreter:
         isSensitive = False
         for key in value:
             if(isinstance(value[key], str)):
-                tmp = Interpreter.__intepretString(self, value[key], type)
+                tmp = Interpreter.__intepretString(value[key], type)
             elif(isinstance(value[key], dict)):
-                tmp = Interpreter.__interpretDict(value[key])
+                tmp = Interpreter.__interpretDict(value[key], type)
             elif(isinstance(value[key], list)):
-                tmp = Interpreter.__interpretList(value[key])
+                tmp = Interpreter.__interpretList(value[key], type)
             else:
                 tmp = value[key]
             if(tmp.sensitive):
@@ -34,15 +34,15 @@ class Interpreter:
             value[key] = tmp.value
         return VariableValue(value, isSensitive)
 
-    def __interpretList(self, value: list) -> VariableValue:
+    def __interpretList(self, value: list, type: str = "variable") -> VariableValue:
         isSensitive = False
         for val in value:
             if(isinstance(val, str)):
-                tmp = Interpreter.__intepretString(val)
+                tmp = Interpreter.__intepretString(val, type)
             elif(isinstance(val, dict)):
-                tmp = Interpreter.__interpretDict(val)
+                tmp = Interpreter.__interpretDict(val, type)
             elif(isinstance(val, list)):
-                tmp = Interpreter.__interpretList(val)
+                tmp = Interpreter.__interpretList(val, type)
             else:
                 tmp = val
             if(tmp.sensitive):
@@ -66,16 +66,16 @@ class Interpreter:
                     self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
         return VariableValue(value, isSensitive)        
                            
-    def __interpret(self, variable: VariableValue) -> VariableValue:
+    def __interpret(self, variable: VariableValue, type: str = "variable") -> VariableValue:
         isSensitive = variable.sensitive
         if(variable is None):
             return None
         if(isinstance(variable.value, str)):
-            tmp = self.__intepretString(variable.value)
+            tmp = self.__intepretString(variable.value, type)
         elif(isinstance(variable.value, dict)):
-            tmp = self.__interpretDict(variable.value)
+            tmp = self.__interpretDict(variable.value, type)
         elif(isinstance(variable.value, list)):
-            tmp = self.__interpretList(variable.value)
+            tmp = self.__interpretList(variable.value, type)
         else:
             tmp = variable
         if(tmp.sensitive):
@@ -88,7 +88,9 @@ class Interpreter:
             self._variables[key] = self.__interpret(self._variables[key])
             
     def interpretParameters(self, parameters: dict) -> dict:
-        return self.__interpretDict(parameters, "parameter").value
+        for key in parameters:
+            parameters[key] = self.__interpret(VariableValue(parameters[key]), "parameter").value
+        return parameters
     
 class FileSystem:
 
