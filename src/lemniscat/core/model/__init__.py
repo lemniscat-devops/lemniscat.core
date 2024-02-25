@@ -1,1 +1,1 @@
-from lemniscat.core.model.models import Meta, TaskResult
+from lemniscat.core.model.models import Meta, TaskResult, VariableValue

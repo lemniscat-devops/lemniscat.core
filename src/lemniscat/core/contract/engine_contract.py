@@ -1,9 +1,10 @@
 from logging import Logger
+import re
 from typing import Optional, List
 
 from lemniscat.core.model import Meta, TaskResult
-from lemniscat.core.util.helpers import Interpreter
-
+from lemniscat.core.model.models import VariableValue
+from lemniscat.core.util.helpers import LogUtil, Interpreter
 
 class IPluginRegistry(type):
     plugin_registries: List[type] = list()
@@ -12,7 +13,6 @@ class IPluginRegistry(type):
         super().__init__(cls)
         if name != 'PluginCore':
             IPluginRegistry.plugin_registries.append(cls)
-
 
 class PluginCore(object, metaclass=IPluginRegistry):
     """
@@ -64,3 +64,12 @@ class PluginCore(object, metaclass=IPluginRegistry):
         
     def getVariables(self) -> dict:
         return self.variables
+    
+if __name__ == "__main__":
+    logger = LogUtil.create()
+    plugin = PluginCore(logger)
+    variables = {}
+    variables["toto"] = VariableValue("${{ titi }}-2")
+    variables["titi"] = VariableValue("tata")
+    
+    plugin.invoke({ "test": "${{ toto }}"}, variables)
