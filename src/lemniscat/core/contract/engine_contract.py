@@ -74,8 +74,9 @@ if __name__ == "__main__":
     variables = {}
     variables["toto"] = VariableValue("${{ titi }}-2")
     variables["titi"] = VariableValue("tata", True)
+    variables["tutu"] = VariableValue("tata", None)
     variables["containers_list"] = VariableValue([{ 'name': '${{ toto }}' }, { 'name':'container2'}, { 'test': False, 'lorem': { 'name': 'impsum' } }], True)
-    variables["dict"] = VariableValue({ 'name': 'container1', 'displayname':'${{ toto }}'}, True)
+    variables["dict"] = VariableValue({ 'name': 'container1', 'displayname':'${{ toto }}', 'test': None}, True)
     
     plugin.invoke({ "test": "${{ toto }}", "test2": { "name": "${{ titi }}", "enable": True }, 'test3': [ 1, 52, 36 ]}, variables)
     
