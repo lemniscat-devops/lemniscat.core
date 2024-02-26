@@ -77,6 +77,6 @@ if __name__ == "__main__":
     variables["containers_list"] = VariableValue([{ 'name': '${{ toto }}' }, { 'name':'container2'}], True)
     variables["dict"] = VariableValue({ 'name': 'container1', 'displayname':'${{ toto }}'}, True)
     
-    plugin.invoke({ "test": "${{ toto }}"}, variables)
+    plugin.invoke({ "test": "${{ toto }}", "test2": { "name": "${{ titi }}", "enable": True }}, variables)
     
     

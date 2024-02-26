@@ -28,7 +28,7 @@ class Interpreter:
             elif(isinstance(value[key], list)):
                 tmp = self.__interpretList(value[key], type)
             else:
-                tmp = value[key]
+                tmp = VariableValue(value[key])
             if(tmp.sensitive):
                 isSensitive = True
             value[key] = tmp.value
@@ -44,7 +44,7 @@ class Interpreter:
             elif(isinstance(val, list)):
                 tmp = self.__interpretList(val, type)
             else:
-                tmp = val
+                tmp = VariableValue(val)
             if(tmp.sensitive):
                 isSensitive = True
             val = tmp.value
