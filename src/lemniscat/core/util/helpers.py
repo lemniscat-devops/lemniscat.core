@@ -91,6 +91,15 @@ class Interpreter:
         for key in parameters:
             parameters[key] = self.__interpret(VariableValue(parameters[key]), "parameter").value
         return parameters
+            
+    def interpretDict(self, data: dict, type: str="undefined") -> dict:
+        return self.__interpretDict(data, type).value
+            
+    def interpretString(self, data: str, type: str="undefined") -> str:
+        return self.__intepretString(data, type).value
+            
+    def interpretList(self, data: list, type: str="undefined") -> list:
+        return self.__interpretList(data, type).value
     
 class FileSystem:
 
