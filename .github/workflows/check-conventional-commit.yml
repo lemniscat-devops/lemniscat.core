@@ -19,24 +19,8 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Generate PR Description
-        uses: Ant0wan/openai-pr@v1
+      - uses: platisd/openai-pr-description@master
         with:
-          api-key: ${{ secrets.OPENAI_API_KEY }}
-          model: "TranscriptSynthesis"
-          template: |
-            ## Description
-
-            This pull request addresses the following issues:
-
-            - Issue 1
-            - Issue 2
-
-            ## Changes
-
-            - Change 1
-            - Change 2
-          header: "Hello, I need your help in generating a pull request description. Please analyze the changes and provide a concise description."
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 
