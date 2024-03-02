@@ -1,17 +1,18 @@
 name: "Lint PR"
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
       - synchronize
 
 permissions:
-  pull-requests: read
+  pull-requests: write
+  contents: read
 
 jobs:
-  main:
+  pull-request:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
