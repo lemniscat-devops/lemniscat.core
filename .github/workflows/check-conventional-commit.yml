@@ -1,4 +1,4 @@
-name: "Lint PR"
+name: "PR review"
 
 on:
   pull_request:
@@ -8,8 +8,7 @@ on:
       - synchronize
 
 permissions:
-  pull-requests: write
-  contents: read
+  pull-requests: read
 
 jobs:
   pull-request:
@@ -19,8 +18,4 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: platisd/openai-pr-description@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 
