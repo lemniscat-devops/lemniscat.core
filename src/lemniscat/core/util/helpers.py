@@ -5,6 +5,7 @@ import sys
 from logging import Logger, StreamHandler, DEBUG
 from typing import Union, Optional
 import yaml
+from simpleeval import simple_eval
 
 from lemniscat.core.model import VariableValue
 
@@ -33,7 +34,7 @@ class Interpreter:
                 isSensitive = True
             value[key] = tmp.value
         return VariableValue(value, isSensitive)
-
+    
     def __interpretList(self, value: list, type: str = "variable") -> VariableValue:
         isSensitive = False
         for val in value:
@@ -48,8 +49,8 @@ class Interpreter:
             if(tmp.sensitive):
                 isSensitive = True
             val = tmp.value
-        return VariableValue(value, isSensitive)    
-
+        return VariableValue(value, isSensitive)
+    
     def __intepretString(self, value: str, type: str = "variable") -> VariableValue:
         isSensitive = False
         matches = re.findall(_REGEX_CAPTURE_VARIABLE, value)
@@ -64,8 +65,25 @@ class Interpreter:
                     else:
                         value = value.replace(f'${{{{{match}}}}}', self._variables[var].value)
                     self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
-        return VariableValue(value, isSensitive)        
-                           
+        return VariableValue(value, isSensitive)
+    
+    def __interpretEvalCondition(self, condition) -> bool:
+        select_variables = re.findall(_REGEX_CAPTURE_VARIABLE, condition)
+        select_variables = [var.strip() for var in select_variables]
+        filtered_variables = {key: self._variables[key] for key in select_variables if key in self._variables}
+        variables = {}
+        for key, value in filtered_variables.items():
+            keys = key.split('.')
+            d = variables
+            for k in keys[:-1]:
+                d = d.setdefault(k, {})
+            d[keys[-1]] = value.value if isinstance(value, VariableValue) else value
+        clean_condition = re.sub(_REGEX_CAPTURE_VARIABLE, r"\1", condition)
+        return simple_eval(
+            clean_condition,
+            names=variables
+        )
+    
     def __interpret(self, variable: VariableValue, type: str = "variable") -> VariableValue:
         isSensitive = variable.sensitive
         if(variable is None):
@@ -82,24 +100,27 @@ class Interpreter:
             isSensitive = True
         variable.value = tmp.value
         return VariableValue(variable.value, isSensitive)    
-        
+    
     def interpret(self) -> None:
         for key in self._variables:
             self._variables[key] = self.__interpret(self._variables[key])
-            
+    
     def interpretParameters(self, parameters: dict) -> dict:
         for key in parameters:
             parameters[key] = self.__interpret(VariableValue(parameters[key]), "parameter").value
         return parameters
-            
+    
     def interpretDict(self, data: dict, type: str="undefined") -> dict:
         return self.__interpretDict(data, type).value
-            
+    
     def interpretString(self, data: str, type: str="undefined") -> str:
         return self.__intepretString(data, type).value
-            
+    
     def interpretList(self, data: list, type: str="undefined") -> list:
         return self.__interpretList(data, type).value
+    
+    def interpretEvalCondition(self, condition) -> bool:
+        return self.__interpretEvalCondition(condition)
     
 class FileSystem:
 
