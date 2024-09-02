@@ -5,6 +5,7 @@ import sys
 from logging import Logger, StreamHandler, DEBUG
 from typing import Union, Optional
 import yaml
+from simpleeval import simple_eval
 
 from lemniscat.core.model import VariableValue
 
@@ -18,15 +19,17 @@ class Interpreter:
         self._logger = logger
         self._variables = variables
     
-    def __interpretDict(self, value: dict, type: str = "variable") -> VariableValue:
+    def __interpretDict(self, value: dict, type: str = "variable", excludeInterpret: list = []) -> VariableValue:
         isSensitive = False
         for key in value:
+            if key in excludeInterpret:
+                return VariableValue(value, isSensitive)
             if(isinstance(value[key], str)):
                 tmp = self.__intepretString(value[key], type)
             elif(isinstance(value[key], dict)):
-                tmp = self.__interpretDict(value[key], type)
+                tmp = self.__interpretDict(value[key], type, excludeInterpret)
             elif(isinstance(value[key], list)):
-                tmp = self.__interpretList(value[key], type)
+                tmp = self.__interpretList(value[key], type, excludeInterpret)
             else:
                 tmp = VariableValue(value[key])
             if(tmp.sensitive):
@@ -34,15 +37,15 @@ class Interpreter:
             value[key] = tmp.value
         return VariableValue(value, isSensitive)
 
-    def __interpretList(self, value: list, type: str = "variable") -> VariableValue:
+    def __interpretList(self, value: list, type: str = "variable", excludeInterpret: list = []) -> VariableValue:
         isSensitive = False
         for val in value:
             if(isinstance(val, str)):
                 tmp = self.__intepretString(val, type)
             elif(isinstance(val, dict)):
-                tmp = self.__interpretDict(val, type)
+                tmp = self.__interpretDict(val, type, excludeInterpret)
             elif(isinstance(val, list)):
-                tmp = self.__interpretList(val, type)
+                tmp = self.__interpretList(val, type, excludeInterpret)
             else:
                 tmp = VariableValue(val)
             if(tmp.sensitive):
@@ -65,17 +68,34 @@ class Interpreter:
                         value = value.replace(f'${{{{{match}}}}}', self._variables[var].value)
                     self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
         return VariableValue(value, isSensitive)        
-                           
-    def __interpret(self, variable: VariableValue, type: str = "variable") -> VariableValue:
+
+    def __interpretEvalCondition(self, condition) -> bool:
+        select_variables = re.findall(_REGEX_CAPTURE_VARIABLE, condition)
+        select_variables = [var.strip() for var in select_variables]
+        filtered_variables = {key: self._variables[key] for key in select_variables if key in self._variables}
+        variables = {}
+        for key, value in filtered_variables.items():
+            keys = key.split('.')
+            d = variables
+            for k in keys[:-1]:
+                d = d.setdefault(k, {})
+            d[keys[-1]] = value.value if isinstance(value, VariableValue) else value
+        clean_condition = re.sub(_REGEX_CAPTURE_VARIABLE, r"\1", condition)
+        return simple_eval(
+            clean_condition,
+            names=variables
+        )
+
+    def __interpret(self, variable: VariableValue, type: str = "variable", excludeInterpret: list = []) -> VariableValue:
         isSensitive = variable.sensitive
         if(variable is None):
             return None
         if(isinstance(variable.value, str)):
             tmp = self.__intepretString(variable.value, type)
         elif(isinstance(variable.value, dict)):
-            tmp = self.__interpretDict(variable.value, type)
+            tmp = self.__interpretDict(variable.value, type, excludeInterpret)
         elif(isinstance(variable.value, list)):
-            tmp = self.__interpretList(variable.value, type)
+            tmp = self.__interpretList(variable.value, type, excludeInterpret)
         else:
             tmp = variable
         if(tmp.sensitive):
@@ -83,23 +103,26 @@ class Interpreter:
         variable.value = tmp.value
         return VariableValue(variable.value, isSensitive)    
         
-    def interpret(self) -> None:
+    def interpret(self, excludeInterpret: list = []) -> None:
         for key in self._variables:
-            self._variables[key] = self.__interpret(self._variables[key])
+            self._variables[key] = self.__interpret(self._variables[key], excludeInterpret)
             
-    def interpretParameters(self, parameters: dict) -> dict:
+    def interpretParameters(self, parameters: dict, excludeInterpret: list = []) -> dict:
         for key in parameters:
-            parameters[key] = self.__interpret(VariableValue(parameters[key]), "parameter").value
+            parameters[key] = self.__interpret(VariableValue(parameters[key]), "parameter", excludeInterpret).value
         return parameters
             
-    def interpretDict(self, data: dict, type: str="undefined") -> dict:
-        return self.__interpretDict(data, type).value
+    def interpretDict(self, data: dict, type: str="undefined", excludeInterpret: list = []) -> dict:
+        return self.__interpretDict(data, type, excludeInterpret).value
             
     def interpretString(self, data: str, type: str="undefined") -> str:
         return self.__intepretString(data, type).value
-            
-    def interpretList(self, data: list, type: str="undefined") -> list:
-        return self.__interpretList(data, type).value
+
+    def interpretEvalCondition(self, condition) -> bool:
+        return self.__interpretEvalCondition(condition)
+
+    def interpretList(self, data: list, type: str="undefined", excludeInterpret: list = []) -> list:
+        return self.__interpretList(data, type, excludeInterpret).value
     
 class FileSystem:
 
