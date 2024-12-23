@@ -1,2 +1,2 @@
 # lemniscat.core
-A core library form runtime and plugins
+A core library for runtime and plugins
