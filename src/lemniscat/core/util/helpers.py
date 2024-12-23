@@ -91,6 +91,8 @@ class Interpreter:
         for key, value in filtered_variables.items():
             variables[key] = value.value if isinstance(value, VariableValue) else value
         clean_condition = re.sub(_REGEX_CAPTURE_VARIABLE, r"\1", condition)
+        self._logger.debug(f"Interpreting condition: {clean_condition}")
+        self._logger.debug(f"Variables: {variables}")
         return simple_eval(
             clean_condition,
             names=variables
