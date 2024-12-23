@@ -10,6 +10,7 @@ from simpleeval import simple_eval
 from lemniscat.core.model import VariableValue
 
 _REGEX_CAPTURE_VARIABLE = r"(?:\${{(?P<var>[^}]+)}})"
+_REGEX_CAPTURE_VARIABLE_CONVERTSTR = r"(?:\W*str\((?P<var>[^)]+)\)\W*)"
 
 class Interpreter:
     _logger: Logger
@@ -58,15 +59,28 @@ class Interpreter:
         matches = re.findall(_REGEX_CAPTURE_VARIABLE, value)
         if(len(matches) > 0):
             for match in matches:
-                var = str.strip(match)
-                if(var in self._variables):
-                    if(self._variables[var].sensitive):
-                        isSensitive = True
-                    if(value == f'${{{{{match}}}}}'):
-                        value = self._variables[var].value
-                    else:
-                        value = value.replace(f'${{{{{match}}}}}', self._variables[var].value)
-                    self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
+                convertStrMatches = re.findall(_REGEX_CAPTURE_VARIABLE_CONVERTSTR, match)
+                if(len(convertStrMatches) > 0):
+                    for convertStrMatch in convertStrMatches:
+                        convertStrVar = str.strip(convertStrMatch)
+                        if(convertStrVar in self._variables):
+                            if(self._variables[convertStrVar].sensitive):
+                                isSensitive = True
+                            if(value == f'${{{{{convertStrMatch}}}}}'):
+                                value = str(self._variables[convertStrVar].value)
+                            else:
+                                value = value.replace(f'${{{{{convertStrMatch}}}}}', str(self._variables[convertStrVar].value))
+                            self._logger.debug(f"Interpreting and converting to string {type}: {convertStrVar} -> {str(self._variables[convertStrVar])}")
+                else:
+                    var = str.strip(match)
+                    if(var in self._variables):
+                        if(self._variables[var].sensitive):
+                            isSensitive = True
+                        if(value == f'${{{{{match}}}}}'):
+                            value = self._variables[var].value
+                        else:
+                            value = value.replace(f'${{{{{match}}}}}', self._variables[var].value)
+                        self._logger.debug(f"Interpreting {type}: {var} -> {self._variables[var]}")
         return VariableValue(value, isSensitive)        
 
     def __interpretEvalCondition(self, condition) -> bool:
