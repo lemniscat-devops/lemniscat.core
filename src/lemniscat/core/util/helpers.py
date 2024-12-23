@@ -66,11 +66,11 @@ class Interpreter:
                         if(convertStrVar in self._variables):
                             if(self._variables[convertStrVar].sensitive):
                                 isSensitive = True
-                            if(value == f'${{{{{convertStrMatch}}}}}'):
-                                value = str(self._variables[convertStrVar])
+                            if(value == f'${{{{{match}}}}}'):
+                                value = str(self._variables[convertStrVar].value)
                             else:
-                                value = value.replace(f'${{{{{convertStrMatch}}}}}', str(self._variables[convertStrVar]))
-                            self._logger.debug(f"Interpreting and converting to string {type}: {convertStrVar} -> {str(self._variables[convertStrVar])}")
+                                value = value.replace(f'${{{{{match}}}}}', str(self._variables[convertStrVar].value))
+                            self._logger.debug(f"Interpreting and converting to string {type}: {convertStrVar} -> {str(self._variables[convertStrVar].value)}")
                 else:
                     var = str.strip(match)
                     if(var in self._variables):
