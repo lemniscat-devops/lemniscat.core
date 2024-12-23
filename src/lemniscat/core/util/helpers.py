@@ -67,9 +67,9 @@ class Interpreter:
                             if(self._variables[convertStrVar].sensitive):
                                 isSensitive = True
                             if(value == f'${{{{{convertStrMatch}}}}}'):
-                                value = str(self._variables[convertStrVar].value)
+                                value = str(self._variables[convertStrVar])
                             else:
-                                value = value.replace(f'${{{{{convertStrMatch}}}}}', str(self._variables[convertStrVar].value))
+                                value = value.replace(f'${{{{{convertStrMatch}}}}}', str(self._variables[convertStrVar]))
                             self._logger.debug(f"Interpreting and converting to string {type}: {convertStrVar} -> {str(self._variables[convertStrVar])}")
                 else:
                     var = str.strip(match)
@@ -89,11 +89,7 @@ class Interpreter:
         filtered_variables = {key: self._variables[key] for key in select_variables if key in self._variables}
         variables = {}
         for key, value in filtered_variables.items():
-            keys = key.split('.')
-            d = variables
-            for k in keys[:-1]:
-                d = d.setdefault(k, {})
-            d[keys[-1]] = value.value if isinstance(value, VariableValue) else value
+            variables[key] = value.value if isinstance(value, VariableValue) else value
         clean_condition = re.sub(_REGEX_CAPTURE_VARIABLE, r"\1", condition)
         return simple_eval(
             clean_condition,
